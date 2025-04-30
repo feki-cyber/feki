@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathAI Ultimate - Suite Mathématique Complète</title>
-    <!-- Bibliothèques -->
+    <title>MathAI Pro - Suite Mathématique Complète</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.11.1/min/plotly.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mathlive@0.73.9/dist/mathlive.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.11.1/min/plotly.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/3.18.0/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
     <style>
         :root {
             --primary: #4a6bdf;
@@ -21,6 +20,7 @@
             margin: 0;
             padding: 20px;
             background-color: #f8f9fa;
+            color: #212529;
         }
         .container {
             max-width: 1200px;
@@ -77,6 +77,9 @@
         .btn:hover {
             opacity: 0.9;
         }
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
         .result-container {
             background: white;
             border: 1px solid #dee2e6;
@@ -125,18 +128,26 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .history-item:hover {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>MathAI Ultimate - Suite Mathématique Complète</h1>
+        <h1>MathAI Pro - Suite Mathématique Complète</h1>
         
         <div class="tabs">
             <div class="tab active" data-tab="calcul">Calcul Formel</div>
             <div class="tab" data-tab="graph">Graphiques</div>
-            <div class="tab" data-tab="handwriting">Reconnaissance</div>
             <div class="tab" data-tab="equations">Équations</div>
-            <div class="tab" data-tab="database">Base de Données</div>
+            <div class="tab" data-tab="handwriting">Reconnaissance</div>
+            <div class="tab" data-tab="history">Historique</div>
         </div>
         
         <!-- Onglet Calcul Formel -->
@@ -147,7 +158,6 @@
             <button class="btn" id="btnDerive">Dériver</button>
             <button class="btn" id="btnIntegrate">Intégrer</button>
             <button class="btn" id="btnSimplify">Simplifier</button>
-            <button class="btn" id="btnLimit">Limite</button>
             
             <div class="result-container">
                 <h3>Résultat</h3>
@@ -163,7 +173,7 @@
             
             <div class="input-group">
                 <label>Fonction 2D (ex: sin(x)*exp(x))</label>
-                <input type="text" id="function2D" class="math-field" value="sin(x)*x">
+                <input type="text" id="function2D" class="math-field" value="sin(x)">
             </div>
             <button class="btn" id="btnPlot2D">Tracer 2D</button>
             <div id="graph2D"></div>
@@ -176,27 +186,13 @@
             <div id="graph3D"></div>
         </div>
         
-        <!-- Onglet Reconnaissance -->
-        <div class="tab-content" id="handwriting">
-            <h2>Reconnaissance d'Écriture Mathématique</h2>
-            <canvas id="handwritingCanvas"></canvas>
-            <button class="btn" id="btnClearCanvas">Effacer</button>
-            <button class="btn" id="btnRecognize">Reconnaître</button>
-            
-            <div class="result-container">
-                <h3>Résultat</h3>
-                <div id="recognitionResult">Dessinez une expression mathématique</div>
-                <div id="recognitionMath"></div>
-            </div>
-        </div>
-        
         <!-- Onglet Équations -->
         <div class="tab-content" id="equations">
             <h2>Solveur d'Équations</h2>
             
             <div class="input-group">
                 <label>Équation linéaire (ax + b = 0)</label>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px; align-items: center;">
                     <input type="number" id="linearA" placeholder="a" value="2" style="width: 60px;">
                     <span>x +</span>
                     <input type="number" id="linearB" placeholder="b" value="-4" style="width: 60px;">
@@ -218,7 +214,7 @@
             </div>
             <button class="btn" id="btnSolveQuad">Résoudre</button>
             
-            <div class="result-container" id="eqResult">
+            <div class="result-container">
                 <h3>Solution</h3>
                 <div id="equationSolution"></div>
                 <h3>Étapes</h3>
@@ -226,26 +222,31 @@
             </div>
         </div>
         
-        <!-- Onglet Base de Données -->
-        <div class="tab-content" id="database">
-            <h2>Base de Données Mathématique</h2>
-            <div class="input-group">
-                <label>Rechercher une équation ou formule</label>
-                <input type="text" id="searchTerm" class="math-field" placeholder="ex: théorème de Pythagore">
-            </div>
-            <button class="btn" id="btnSearch">Rechercher</button>
+        <!-- Onglet Reconnaissance -->
+        <div class="tab-content" id="handwriting">
+            <h2>Reconnaissance d'Écriture Mathématique</h2>
+            <canvas id="handwritingCanvas"></canvas>
+            <button class="btn" id="btnClearCanvas">Effacer</button>
+            <button class="btn" id="btnRecognize">Reconnaître</button>
             
             <div class="result-container">
-                <h3>Résultats</h3>
-                <div id="searchResults">
-                    <p>Exemples de recherches : "théorème de Pythagore", "formule quadratique", "identités trigonométriques"</p>
-                </div>
+                <h3>Résultat</h3>
+                <div id="recognitionResult">Dessinez une expression mathématique</div>
+                <div id="recognitionMath"></div>
             </div>
+        </div>
+        
+        <!-- Onglet Historique -->
+        <div class="tab-content" id="history">
+            <h2>Historique des Calculs</h2>
+            <button class="btn" id="btnClearHistory">Effacer l'historique</button>
+            <div id="calculationHistory" style="margin-top: 20px;"></div>
         </div>
     </div>
 
     <script>
-        // Initialisation de l'éditeur mathématique
+        // ==================== INITIALISATION ====================
+        // Éditeur mathématique
         const mathField = MathLive.makeMathField('mathEditor', {
             virtualKeyboardMode: 'manual',
             virtualKeyboards: 'all'
@@ -259,17 +260,53 @@
                 
                 tab.classList.add('active');
                 document.getElementById(tab.dataset.tab).classList.add('active');
+                
+                // Redimensionner les graphiques quand l'onglet est activé
+                if (tab.dataset.tab === 'graph') {
+                    setTimeout(() => {
+                        if (window.plot2D) Plotly.Plots.resize('graph2D');
+                        if (window.plot3D) window.plot3D.resize();
+                    }, 100);
+                }
             });
         });
 
-        // ==================== CALCUL FORMEL ====================
-        document.getElementById('btnCalculate').addEventListener('click', calculate);
-        document.getElementById('btnDerive').addEventListener('click', () => calculate('derive'));
-        document.getElementById('btnIntegrate').addEventListener('click', () => calculate('integrate'));
-        document.getElementById('btnSimplify').addEventListener('click', () => calculate('simplify'));
-        document.getElementById('btnLimit').addEventListener('click', () => calculate('limit'));
+        // Historique des calculs
+        let calculationHistory = JSON.parse(localStorage.getItem('mathHistory')) || [];
+        function updateHistory() {
+            const historyContainer = document.getElementById('calculationHistory');
+            historyContainer.innerHTML = calculationHistory.length === 0 ? 
+                '<p>Aucun calcul dans l\'historique</p>' :
+                calculationHistory.map((item, index) => `
+                    <div class="history-item" data-index="${index}">
+                        <strong>${item.operation}</strong>: ${item.expression} = ${item.result}
+                    </div>
+                `).join('');
+            
+            // Ajouter les écouteurs d'événements
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const index = item.getAttribute('data-index');
+                    const historyItem = calculationHistory[index];
+                    mathField.setValue(historyItem.expression);
+                    document.querySelector('.tab[data-tab="calcul"]').click();
+                });
+            });
+        }
+        
+        document.getElementById('btnClearHistory').addEventListener('click', () => {
+            calculationHistory = [];
+            localStorage.setItem('mathHistory', JSON.stringify(calculationHistory));
+            updateHistory();
+        });
 
-        function calculate(operation = 'calculate') {
+        // ==================== CALCUL FORMEL ====================
+        document.getElementById('btnCalculate').addEventListener('click', () => calculate('calculate'));
+        document.getElementById('btnDerive').addEventListener('click', () => calculate('derivative'));
+        document.getElementById('btnIntegrate').addEventListener('click', () => calculate('integral'));
+        document.getElementById('btnSimplify').addEventListener('click', () => calculate('simplify'));
+
+        function calculate(operation) {
             const expr = mathField.getValue();
             const resultDiv = document.getElementById('calcResult');
             const stepsDiv = document.getElementById('calcSteps');
@@ -277,115 +314,75 @@
             resultDiv.innerHTML = '<span class="loading"></span> Calcul en cours...';
             stepsDiv.innerHTML = '';
             
-            setTimeout(() => {
-                try {
-                    let result, steps = [];
-                    const exprLatex = expr.replace(/\\/g, '\\\\');
-                    
-                    switch(operation) {
-                        case 'derive':
-                            result = `\\frac{d}{dx}\\left(${exprLatex}\\right) = ${simulateDerivative(expr)}`;
-                            steps = [
-                                "1. Application des règles de dérivation",
-                                "2. Dérivée des termes élémentaires",
-                                "3. Simplification de l'expression"
-                            ];
-                            break;
-                        case 'integrate':
-                            result = `\\int ${exprLatex}\\,dx = ${simulateIntegral(expr)} + C`;
-                            steps = [
-                                "1. Recherche de la primitive",
-                                "2. Application des techniques d'intégration",
-                                "3. Ajout de la constante d'intégration"
-                            ];
-                            break;
-                        case 'simplify':
-                            result = `${exprLatex} = ${simulateSimplification(expr)}`;
-                            steps = [
-                                "1. Développement des expressions",
-                                "2. Factorisation des termes communs",
-                                "3. Réduction des fractions"
-                            ];
-                            break;
-                        case 'limit':
-                            result = `\\lim_{x \\to 0} ${exprLatex} = ${simulateLimit(expr)}`;
-                            steps = [
-                                "1. Analyse de la fonction",
-                                "2. Application des règles de limite",
-                                "3. Calcul de la valeur approchée"
-                            ];
-                            break;
-                        default:
-                            result = `${exprLatex} = ${simulateCalculation(expr)}`;
-                            steps = [
-                                "1. Évaluation des termes",
-                                "2. Application des opérations arithmétiques",
-                                "3. Calcul final"
-                            ];
-                    }
-                    
-                    resultDiv.innerHTML = `$$${result}$$`;
-                    stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
-                    MathJax.typeset();
-                } catch (error) {
-                    resultDiv.innerHTML = `Erreur: ${error.message}`;
+            try {
+                let result, steps = [];
+                
+                switch(operation) {
+                    case 'derivative':
+                        result = math.derivative(expr, 'x').toString();
+                        steps = [
+                            "1. Application des règles de dérivation",
+                            `2. Dérivée de ${expr} par rapport à x`,
+                            `3. Résultat: ${result}`
+                        ];
+                        break;
+                        
+                    case 'integral':
+                        result = math.integrate(expr, 'x').toString() + " + C";
+                        steps = [
+                            "1. Recherche de la primitive",
+                            `2. Intégrale de ${expr} par rapport à x`,
+                            `3. Résultat: ${result}`
+                        ];
+                        break;
+                        
+                    case 'simplify':
+                        result = math.simplify(expr).toString();
+                        steps = [
+                            "1. Simplification de l'expression",
+                            `2. Forme simplifiée de ${expr}`,
+                            `3. Résultat: ${result}`
+                        ];
+                        break;
+                        
+                    default:
+                        result = math.evaluate(expr);
+                        steps = [
+                            "1. Évaluation de l'expression",
+                            `2. Calcul de ${expr}`,
+                            `3. Résultat: ${result}`
+                        ];
                 }
-            }, 800);
+                
+                // Ajout à l'historique
+                calculationHistory.unshift({
+                    operation: getOperationName(operation),
+                    expression: expr,
+                    result: result
+                });
+                if (calculationHistory.length > 20) calculationHistory.pop();
+                localStorage.setItem('mathHistory', JSON.stringify(calculationHistory));
+                updateHistory();
+                
+                // Affichage du résultat
+                resultDiv.innerHTML = `$$${expr} = ${result}$$`;
+                stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
+                
+            } catch (error) {
+                resultDiv.innerHTML = `Erreur: ${error.message}`;
+            }
+            
+            MathJax.typeset();
         }
 
-        // Fonctions de simulation pour le calcul formel
-        function simulateDerivative(expr) {
-            const derivatives = {
-                'x^2': '2x',
-                'x^3': '3x^2',
-                'sin(x)': 'cos(x)',
-                'cos(x)': '-sin(x)',
-                'e^x': 'e^x',
-                'ln(x)': '1/x',
-                'sqrt(x)': '1/(2sqrt(x))'
+        function getOperationName(op) {
+            const names = {
+                'calculate': 'Calcul',
+                'derivative': 'Dérivée',
+                'integral': 'Intégrale',
+                'simplify': 'Simplification'
             };
-            return derivatives[expr] || '\\text{Non implémenté}';
-        }
-
-        function simulateIntegral(expr) {
-            const integrals = {
-                'x': 'x^2/2',
-                'x^2': 'x^3/3',
-                'sin(x)': '-cos(x)',
-                'cos(x)': 'sin(x)',
-                'e^x': 'e^x',
-                '1/x': 'ln|x|'
-            };
-            return integrals[expr] || '\\text{Non implémenté}';
-        }
-
-        function simulateSimplification(expr) {
-            const simplifications = {
-                '(x+1)^2': 'x^2 + 2x + 1',
-                'sin(x)^2 + cos(x)^2': '1',
-                '2x + 3x': '5x',
-                '(x^2 -1)/(x-1)': 'x+1'
-            };
-            return simplifications[expr] || '\\text{Non implémenté}';
-        }
-
-        function simulateLimit(expr) {
-            const limits = {
-                'sin(x)/x': '1',
-                '(1-cos(x))/x': '0',
-                '(e^x -1)/x': '1'
-            };
-            return limits[expr] || '\\text{Non implémenté}';
-        }
-
-        function simulateCalculation(expr) {
-            const calculations = {
-                '2+2*2': '6',
-                'sqrt(9)': '3',
-                '3!': '6',
-                'pi/2': '\\frac{\\pi}{2}'
-            };
-            return calculations[expr] || '\\text{Non implémenté}';
+            return names[op] || 'Opération';
         }
 
         // ==================== GRAPHIQUES ====================
@@ -397,14 +394,18 @@
             const graphDiv = document.getElementById('graph2D');
             
             try {
-                // Génération des données (simplifiée - utiliser un vrai parser en production)
+                // Création des données
                 const xValues = [];
                 const yValues = [];
                 
                 for (let x = -10; x <= 10; x += 0.1) {
-                    xValues.push(x);
-                    // ATTENTION: eval() est dangereux - à remplacer en production
-                    yValues.push(eval(func.replace(/x/g, `(${x})`));
+                    try {
+                        const y = math.evaluate(func, {x: x});
+                        xValues.push(x);
+                        yValues.push(y);
+                    } catch (e) {
+                        console.warn(`Erreur à x=${x}: ${e}`);
+                    }
                 }
                 
                 const trace = {
@@ -415,7 +416,7 @@
                     line: {color: 'blue', width: 2}
                 };
                 
-                Plotly.newPlot(graphDiv, [trace], {
+                window.plot2D = Plotly.newPlot(graphDiv, [trace], {
                     title: `Fonction: ${func}`,
                     xaxis: {title: 'x'},
                     yaxis: {title: 'f(x)'},
@@ -431,34 +432,79 @@
             const container = document.getElementById('graph3D');
             container.innerHTML = '';
             
-            // Initialisation de la scène Three.js
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
-            
-            // Grille et axes
-            scene.add(new THREE.GridHelper(10, 10));
-            scene.add(new THREE.AxesHelper(5));
-            
-            // Position caméra
-            camera.position.set(5, 5, 5);
-            camera.lookAt(0, 0, 0);
-            
-            // Contrôles
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
-            
-            // Animation
-            function animate() {
-                requestAnimationFrame(animate);
-                controls.update();
-                renderer.render(scene, camera);
+            try {
+                // Initialisation de la scène Three.js
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({antialias: true});
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.appendChild(renderer.domElement);
+                
+                // Grille et axes
+                scene.add(new THREE.GridHelper(10, 10, 0x888888, 0x444444));
+                scene.add(new THREE.AxesHelper(5));
+                
+                // Surface 3D
+                const geometry = new THREE.BufferGeometry();
+                const material = new THREE.MeshBasicMaterial({color: 0x4a6bdf, wireframe: true});
+                const mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+                
+                // Génération des points
+                const size = 10;
+                const divisions = 50;
+                const vertices = [];
+                
+                for (let i = 0; i <= divisions; i++) {
+                    const x = (i / divisions) * size - size / 2;
+                    
+                    for (let j = 0; j <= divisions; j++) {
+                        const y = (j / divisions) * size - size / 2;
+                        
+                        try {
+                            const z = math.evaluate(func, {x: x, y: y});
+                            vertices.push(x, y, z);
+                        } catch (e) {
+                            vertices.push(x, y, 0);
+                        }
+                    }
+                }
+                
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                
+                // Position caméra
+                camera.position.set(8, 8, 8);
+                camera.lookAt(0, 0, 0);
+                
+                // Contrôles
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                
+                // Animation
+                function animate() {
+                    requestAnimationFrame(animate);
+                    controls.update();
+                    renderer.render(scene, camera);
+                }
+                animate();
+                
+                // Gestion du redimensionnement
+                window.plot3D = {
+                    resize: () => {
+                        camera.aspect = container.clientWidth / container.clientHeight;
+                        camera.updateProjectionMatrix();
+                        renderer.setSize(container.clientWidth, container.clientHeight);
+                    }
+                };
+                
+                window.addEventListener('resize', () => {
+                    if (window.plot3D) window.plot3D.resize();
+                });
+                
+            } catch (error) {
+                container.innerHTML = `<p style="color:red;">Erreur: ${error.message}</p>`;
             }
-            animate();
-            
-            // À compléter avec le tracé 3D réel de la fonction
-            container.innerHTML += `<p style="text-align:center;">Fonction 3D: ${func} (simulation)</p>`;
         }
 
         // ==================== RECONNAISSANCE MANUSCRITE ====================
@@ -466,7 +512,7 @@
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
         
-        // Ajuster la taille du canvas
+        // Ajustement de la taille du canvas
         function resizeCanvas() {
             const container = canvas.parentElement;
             canvas.width = container.clientWidth;
@@ -474,11 +520,14 @@
             ctx.lineWidth = 3;
             ctx.lineCap = 'round';
             ctx.strokeStyle = '#000';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
         
         window.addEventListener('load', resizeCanvas);
         window.addEventListener('resize', resizeCanvas);
         
+        // Gestion du dessin
         canvas.addEventListener('mousedown', startDrawing);
         canvas.addEventListener('mousemove', draw);
         canvas.addEventListener('mouseup', stopDrawing);
@@ -489,25 +538,24 @@
         
         function startDrawing(e) {
             isDrawing = true;
-            draw(e);
-        }
-        
-        function draw(e) {
-            if (!isDrawing) return;
-            
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
             ctx.beginPath();
             ctx.moveTo(e.offsetX, e.offsetY);
         }
         
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+        
         function stopDrawing() {
             isDrawing = false;
-            ctx.beginPath();
         }
         
         function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#000';
             document.getElementById('recognitionResult').textContent = '';
             document.getElementById('recognitionMath').innerHTML = '';
         }
@@ -518,18 +566,26 @@
             
             resultDiv.innerHTML = '<span class="loading"></span> Reconnaissance en cours...';
             
+            // Simulation - dans une vraie application, utiliser une API comme MyScript
             setTimeout(() => {
-                // Simulation - remplacer par une vraie API de reconnaissance
-                const symbols = ['x²', 'y', '=', '0', '+', '-', '∫', '∑', '√', 'π', 'θ'];
-                const recognized = [
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)],
-                    symbols[Math.floor(Math.random() * symbols.length)]
-                ].join(' ');
-                
-                resultDiv.textContent = `Reconnu: ${recognized}`;
-                mathDiv.innerHTML = `Formule: <span>$$${recognized}$$</span>`;
-                MathJax.typeset();
+                try {
+                    // Générer un symbole mathématique aléatoire à partir du dessin
+                    const symbols = ['x', 'y', '=', '+', '-', '×', '÷', '√', '∫', '∑', 'π', 'θ'];
+                    const recognized = [
+                        symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)],
+                        symbols[Math.floor(Math.random() * symbols.length)]
+                    ].join(' ');
+                    
+                    resultDiv.textContent = `Reconnu: ${recognized}`;
+                    mathDiv.innerHTML = `Formule: <span>$$${recognized}$$</span>`;
+                    MathJax.typeset();
+                    
+                    // Ajouter à l'éditeur mathématique
+                    mathField.setValue(recognized);
+                } catch (error) {
+                    resultDiv.innerHTML = `Erreur: ${error.message}`;
+                }
             }, 1500);
         }
 
@@ -546,36 +602,45 @@
             solutionDiv.innerHTML = '<span class="loading"></span> Résolution en cours...';
             stepsDiv.innerHTML = '';
             
-            setTimeout(() => {
-                try {
-                    let solution, steps = [];
-                    
-                    if (a === 0) {
-                        if (b === 0) {
-                            solution = "Tous les x réels sont solutions";
-                            steps = ["L'équation est toujours vraie (0 = 0)"];
-                        } else {
-                            solution = "Aucune solution";
-                            steps = ["L'équation est impossible (0 ≠ " + b + ")"];
-                        }
+            try {
+                let solution, steps = [];
+                
+                if (a === 0) {
+                    if (b === 0) {
+                        solution = "Tous les x réels sont solutions";
+                        steps = ["L'équation est toujours vraie (0 = 0)"];
                     } else {
-                        const x = -b / a;
-                        solution = `$$x = ${x.toFixed(4)}$$`;
-                        steps = [
-                            `Équation: $${a}x + ${b} = 0$$`,
-                            `Isoler x: $${a}x = ${-b}$$`,
-                            `Diviser par ${a}: $$x = \\frac{${-b}}{${a}}$$`,
-                            `Solution: $$x = ${x.toFixed(4)}$$`
-                        ];
+                        solution = "Aucune solution";
+                        steps = ["L'équation est impossible (0 ≠ " + b + ")"];
                     }
-                    
-                    solutionDiv.innerHTML = solution;
-                    stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
-                    MathJax.typeset();
-                } catch (error) {
-                    solutionDiv.innerHTML = `Erreur: ${error.message}`;
+                } else {
+                    const x = -b / a;
+                    solution = `$$x = ${x.toFixed(4)}$$`;
+                    steps = [
+                        `Équation: $${a}x + ${b} = 0$$`,
+                        `Isoler x: $${a}x = ${-b}$$`,
+                        `Diviser par ${a}: $$x = \\frac{${-b}}{${a}}$$`,
+                        `Solution: $$x = ${x.toFixed(4)}$$`
+                    ];
                 }
-            }, 500);
+                
+                solutionDiv.innerHTML = solution;
+                stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
+                
+                // Ajout à l'historique
+                calculationHistory.unshift({
+                    operation: 'Équation linéaire',
+                    expression: `${a}x + ${b} = 0`,
+                    result: solution.replace(/\$/g, '')
+                });
+                localStorage.setItem('mathHistory', JSON.stringify(calculationHistory));
+                updateHistory();
+                
+            } catch (error) {
+                solutionDiv.innerHTML = `Erreur: ${error.message}`;
+            }
+            
+            MathJax.typeset();
         }
 
         function solveQuadratic() {
@@ -588,133 +653,112 @@
             solutionDiv.innerHTML = '<span class="loading"></span> Résolution en cours...';
             stepsDiv.innerHTML = '';
             
-            setTimeout(() => {
-                try {
-                    let solution, steps = [];
-                    
-                    if (a === 0) {
-                        // Cas linéaire
-                        if (b === 0) {
-                            if (c === 0) {
-                                solution = "Tous les x réels sont solutions";
-                                steps = ["L'équation est toujours vraie (0 = 0)"];
-                            } else {
-                                solution = "Aucune solution";
-                                steps = ["L'équation est impossible (0 ≠ " + c + ")"];
-                            }
+            try {
+                let solution, steps = [];
+                
+                if (a === 0) {
+                    // Cas linéaire
+                    if (b === 0) {
+                        if (c === 0) {
+                            solution = "Tous les x réels sont solutions";
+                            steps = ["L'équation est toujours vraie (0 = 0)"];
                         } else {
-                            const x = -c / b;
-                            solution = `$$x = ${x.toFixed(4)}$$`;
-                            steps = [
-                                "Équation dégénérée (1er degré)",
-                                `Solution: $$x = \\frac{${-c}}{${b}} = ${x.toFixed(4)}$$`
-                            ];
+                            solution = "Aucune solution";
+                            steps = ["L'équation est impossible (0 ≠ " + c + ")"];
                         }
                     } else {
-                        // Cas quadratique
-                        const delta = b * b - 4 * a * c;
+                        const x = -c / b;
+                        solution = `$$x = ${x.toFixed(4)}$$`;
                         steps = [
-                            `Équation: $${a}x² + ${b}x + ${c} = 0$$`,
-                            `Calcul du discriminant: $$\\Delta = b² - 4ac = ${b}² - 4 \\times ${a} \\times ${c} = ${delta}$$`
+                            "Équation dégénérée (1er degré)",
+                            `Solution: $$x = \\frac{${-c}}{${b}} = ${x.toFixed(4)}$$`
                         ];
-                        
-                        if (delta < 0) {
-                            const realPart = -b / (2 * a);
-                            const imagPart = Math.sqrt(-delta) / (2 * a);
-                            solution = `$$x = ${realPart.toFixed(4)} \\pm ${imagPart.toFixed(4)}i$$`;
-                            steps.push("Δ < 0 → Solutions complexes conjuguées");
-                        } else if (delta === 0) {
-                            const x = -b / (2 * a);
-                            solution = `$$x = ${x.toFixed(4)}$$ (racine double)`;
-                            steps.push("Δ = 0 → Solution double");
-                            steps.push(`$$x = \\frac{${-b}}{2 \\times ${a}} = ${x.toFixed(4)}$$`);
-                        } else {
-                            const x1 = (-b - Math.sqrt(delta)) / (2 * a);
-                            const x2 = (-b + Math.sqrt(delta)) / (2 * a);
-                            solution = `$$x_1 = ${x1.toFixed(4)} \\quad x_2 = ${x2.toFixed(4)}$$`;
-                            steps.push("Δ > 0 → Deux solutions réelles distinctes");
-                            steps.push(`$$x_1 = \\frac{${-b} - \\sqrt{${delta}}}{2 \\times ${a}} = ${x1.toFixed(4)}$$`);
-                            steps.push(`$$x_2 = \\frac{${-b} + \\sqrt{${delta}}}{2 \\times ${a}} = ${x2.toFixed(4)}$$`);
-                        }
                     }
-                    
-                    solutionDiv.innerHTML = solution;
-                    stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
-                    MathJax.typeset();
-                } catch (error) {
-                    solutionDiv.innerHTML = `Erreur: ${error.message}`;
-                }
-            }, 500);
-        }
-
-        // ==================== BASE DE DONNÉES ====================
-        document.getElementById('btnSearch').addEventListener('click', searchDatabase);
-
-        function searchDatabase() {
-            const term = document.getElementById('searchTerm').value.toLowerCase();
-            const resultsDiv = document.getElementById('searchResults');
-            
-            resultsDiv.innerHTML = '<span class="loading"></span> Recherche en cours...';
-            
-            setTimeout(() => {
-                const database = {
-                    "théorème de pythagore": {
-                        formula: "a² + b² = c²",
-                        description: "Dans un triangle rectangle, le carré de l'hypoténuse est égal à la somme des carrés des deux autres côtés."
-                    },
-                    "formule quadratique": {
-                        formula: "x = \\frac{-b \\pm \\sqrt{b² - 4ac}}{2a}",
-                        description: "Solution générale d'une équation quadratique ax² + bx + c = 0"
-                    },
-                    "identités trigonométriques": [
-                        {
-                            formula: "\\sin²θ + \\cos²θ = 1",
-                            description: "Identité pythagoricienne fondamentale"
-                        },
-                        {
-                            formula: "\\sin(a \\pm b) = \\sin a \\cos b \\pm \\cos a \\sin b",
-                            description: "Formule d'addition pour le sinus"
-                        }
-                    ],
-                    "dérivées usuelles": [
-                        {
-                            formula: "\\frac{d}{dx} x^n = nx^{n-1}",
-                            description: "Règle de puissance"
-                        },
-                        {
-                            formula: "\\frac{d}{dx} e^x = e^x",
-                            description: "Dérivée de l'exponentielle"
-                        }
-                    ]
-                };
-                
-                let found = [];
-                
-                for (const key in database) {
-                    if (key.includes(term)) {
-                        const entry = database[key];
-                        
-                        if (Array.isArray(entry)) {
-                            found.push(...entry);
-                        } else {
-                            found.push(entry);
-                        }
-                    }
-                }
-                
-                if (found.length === 0) {
-                    resultsDiv.innerHTML = `<p>Aucun résultat trouvé pour "${term}"</p>`;
                 } else {
-                    resultsDiv.innerHTML = found.map(item => `
-                        <div class="step">
-                            <h4>$$${item.formula}$$</h4>
-                            <p>${item.description}</p>
-                        </div>
-                    `).join('');
-                    MathJax.typeset();
+                    // Cas quadratique
+                    const delta = b * b - 4 * a * c;
+                    steps = [
+                        `Équation: $${a}x² + ${b}x + ${c} = 0$$`,
+                        `Calcul du discriminant: $$\\Delta = b² - 4ac = ${b}² - 4 \\times ${a} \\times ${c} = ${delta}$$`
+                    ];
+                    
+                    if (delta < 0) {
+                        const realPart = -b / (2 * a);
+                        const imagPart = Math.sqrt(-delta) / (2 * a);
+                        solution = `$$x = ${realPart.toFixed(4)} \\pm ${imagPart.toFixed(4)}i$$`;
+                        steps.push("Δ < 0 → Solutions complexes conjuguées");
+                    } else if (delta === 0) {
+                        const x = -b / (2 * a);
+                        solution = `$$x = ${x.toFixed(4)}$$ (racine double)`;
+                        steps.push("Δ = 0 → Solution double");
+                        steps.push(`$$x = \\frac{${-b}}{2 \\times ${a}} = ${x.toFixed(4)}$$`);
+                    } else {
+                        const x1 = (-b - Math.sqrt(delta)) / (2 * a);
+                        const x2 = (-b + Math.sqrt(delta)) / (2 * a);
+                        solution = `$$x_1 = ${x1.toFixed(4)} \\quad x_2 = ${x2.toFixed(4)}$$`;
+                        steps.push("Δ > 0 → Deux solutions réelles distinctes");
+                        steps.push(`$$x_1 = \\frac{${-b} - \\sqrt{${delta}}}{2 \\times ${a}} = ${x1.toFixed(4)}$$`);
+                        steps.push(`$$x_2 = \\frac{${-b} + \\sqrt{${delta}}}{2 \\times ${a}} = ${x2.toFixed(4)}$$`);
+                    }
                 }
-            }, 800);
+                
+                solutionDiv.innerHTML = solution;
+                stepsDiv.innerHTML = steps.map(step => `<div class="step">${step}</div>`).join('');
+                
+                // Ajout à l'historique
+                calculationHistory.unshift({
+                    operation: 'Équation quadratique',
+                    expression: `${a}x² + ${b}x + ${c} = 0`,
+                    result: solution.replace(/\$/g, '')
+                });
+                localStorage.setItem('mathHistory', JSON.stringify(calculationHistory));
+                updateHistory();
+                
+            } catch (error) {
+                solutionDiv.innerHTML = `Erreur: ${error.message}`;
+            }
+            
+            MathJax.typeset();
         }
+
+        // ==================== INITIALISATION FINALE ====================
+        // Charger l'historique au démarrage
+        updateHistory();
+        
+        // Exécuter quelques tests automatiques
+        function runTests() {
+            console.log("Exécution des tests...");
+            
+            // Test équation linéaire
+            const linearSolution = solveLinearTest(2, -4); // 2x -4 = 0 → x=2
+            console.assert(linearSolution === 2, `Test linéaire échoué: attendu 2, obtenu ${linearSolution}`);
+            
+            // Test équation quadratique
+            const quadSolutions = solveQuadraticTest(1, -3, 2); // x²-3x+2=0 → x=1 et x=2
+            console.assert(quadSolutions.x1 === 1 && quadSolutions.x2 === 2, 
+                `Test quadratique échoué: attendu x1=1, x2=2, obtenu x1=${quadSolutions.x1}, x2=${quadSolutions.x2}`);
+            
+            console.log("Tests complétés (voir la console pour les détails)");
+        }
+        
+        function solveLinearTest(a, b) {
+            if (a === 0) return (b === 0) ? Infinity : -Infinity;
+            return -b / a;
+        }
+        
+        function solveQuadraticTest(a, b, c) {
+            if (a === 0) return { x1: solveLinearTest(b, c), x2: solveLinearTest(b, c) };
+            
+            const delta = b * b - 4 * a * c;
+            if (delta < 0) return { x1: NaN, x2: NaN };
+            
+            const x1 = (-b - Math.sqrt(delta)) / (2 * a);
+            const x2 = (-b + Math.sqrt(delta)) / (2 * a);
+            return { x1, x2 };
+        }
+        
+        // Démarrer les tests après le chargement
+        window.addEventListener('load', runTests);
     </script>
 </body>
 </html>
